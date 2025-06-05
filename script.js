@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
             menuToggle.setAttribute('aria-expanded', !isExpanded);
             mainNavUl.classList.toggle('active');
 
-            // Change icon based on state
             const icon = menuToggle.querySelector('i');
             if (mainNavUl.classList.contains('active')) {
                 icon.classList.remove('fa-bars');
@@ -22,22 +21,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Smooth scroll for anchor links & close mobile menu on click
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    document.querySelectorAll('a[href^="#"], a[href^="https://wa.me/"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            // Check if it's a nav link inside the mobile menu
+            const isWhatsAppLink = this.getAttribute('href').startsWith('https://wa.me/');
+            
             if (mainNavUl && mainNavUl.classList.contains('active') && this.closest('.main-nav')) {
-                mainNavUl.classList.remove('active');
-                menuToggle.setAttribute('aria-expanded', 'false');
-                const icon = menuToggle.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-                menuToggle.setAttribute('aria-label', 'Abrir menu');
+                // Se for um link do menu mobile E NÃO for um link externo (WhatsApp)
+                if (!isWhatsAppLink && this.getAttribute('href').startsWith("#")) {
+                     // Fecha o menu
+                    mainNavUl.classList.remove('active');
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                    const icon = menuToggle.querySelector('i');
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                    menuToggle.setAttribute('aria-label', 'Abrir menu');
+                } else if (isWhatsAppLink) {
+                    // Se for link do WhatsApp no menu mobile, apenas deixa abrir e não fecha o menu
+                    // O comportamento padrão do navegador de abrir o link já é suficiente.
+                    // Poderia fechar o menu aqui também, se desejado:
+                    /*
+                    mainNavUl.classList.remove('active');
+                    menuToggle.setAttribute('aria-expanded', 'false');
+                    // ... (resto do código para mudar ícone)
+                    */
+                }
             }
 
-            // Only prevent default and scroll if it's an actual page anchor
             const targetId = this.getAttribute('href');
-            if (targetId.length > 1 && document.querySelector(targetId)) {
+            if (!isWhatsAppLink && targetId.length > 1 && targetId.startsWith("#") && document.querySelector(targetId)) {
                 e.preventDefault();
                 document.querySelector(targetId).scrollIntoView({
                     behavior: 'smooth'
@@ -46,24 +57,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // (Opcional) Basic form validation feedback - more robust validation should be server-side
-    const contactForm = document.querySelector('.contact-form form');
+    // Lembre-se de substituir SEU_EMAIL_AQUI no action do formulário no HTML
+    // por seu e-mail real para o FormSubmit funcionar.
+    const contactForm = document.querySelector('.contact-form-container form');
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
-            // Example: Check if name is filled (you'd add more checks)
-            const nameInput = contactForm.querySelector('#nome');
-            if (nameInput && nameInput.value.trim() === '') {
-                // You could add visual feedback here, like adding a class to the input
-                // For now, just a console log and preventing submission for demo
-                console.log('Nome é obrigatório.');
-                // alert('Por favor, preencha seu nome.'); // Simple alert
-                // e.preventDefault(); // Uncomment to prevent submission if validation fails
-            }
-            // IMPORTANT: Remember to configure your form's 'action' attribute
-            // to point to a backend script or service that processes the form data.
-            // Example: action="https://formspree.io/f/YOUR_FORM_ID"
-            console.log('Formulário enviado (simulação). Configure o backend!');
+            // O FormSubmit cuida da validação básica e do envio.
+            // Você pode adicionar validações JS mais complexas aqui se desejar,
+            // mas lembre-se que a validação client-side é apenas para UX.
+            console.log('Formulário preparado para FormSubmit.');
         });
     }
-
 });
